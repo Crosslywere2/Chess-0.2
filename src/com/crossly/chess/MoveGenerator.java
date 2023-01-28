@@ -13,23 +13,27 @@ public class MoveGenerator {
     public static final Vector2 left = new Vector2(-Chess.unit, 0);
 
     public static ArrayList<Move> generateMoves(Piece piece) {
-        ArrayList<Move> moves = null;
-        switch (piece.getType()) {
-            case PAWN -> moves = generatePawnMoves(piece);
-            case ROOK -> moves = generateRookMoves(piece);
-            case KNIGHT -> moves = generateKnightMoves(piece);
-            case BISHOP -> moves = generateBishopMoves(piece);
-            case QUEEN -> moves = generateQueenMoves(piece);
-            case KING -> moves = generateKingMoves(piece);
-        }
-        return cullMoves(moves, piece);
+        return generateMoves(piece, false);
     }
 
-    public static ArrayList<Move> generatePawnMoves(Piece pawn) {
+    public static ArrayList<Move> generateMoves(Piece piece, boolean force) {
+        ArrayList<Move> moves = null;
+        switch (piece.getType()) {
+            case PAWN -> moves = generatePawnMoves(piece, force);
+            case ROOK -> moves = generateRookMoves(piece, force);
+            case KNIGHT -> moves = generateKnightMoves(piece, force);
+            case BISHOP -> moves = generateBishopMoves(piece, force);
+            case QUEEN -> moves = generateQueenMoves(piece, force);
+            case KING -> moves = generateKingMoves(piece);
+        }
+        return force ? moves : cullMoves(moves, piece);
+    }
+
+    public static ArrayList<Move> generatePawnMoves(Piece pawn, boolean force) {
         ArrayList<Move> moves = new ArrayList<>(1);
         Vector2 movePos = pawn.getPosition().add(pawn.isWhite() ? up : down);
         if (Board.isPositionValid(movePos)) {
-            if (Board.getPieceAt(movePos) == null) {
+            if (Board.getPieceAt(movePos) == null && !force) {
                 moves.add(new Move(movePos));
                 movePos = movePos.add(pawn.isWhite() ? up : down);
                 if (!pawn.isMoved() && Board.getPieceAt(movePos) == null) {
@@ -41,7 +45,7 @@ public class MoveGenerator {
         movePos = pawn.getPosition().add(pawn.isWhite() ? up : down).add(left);
         if (Board.isPositionValid(movePos)) {
             if ((other = Board.getPieceAt(movePos)) != null) {
-                if (other.getColor() != pawn.getColor()) {
+                if (other.getColor() != pawn.getColor() || force) {
                     moves.add(new Move(movePos, other, Move::take));
                 }
             }
@@ -49,7 +53,7 @@ public class MoveGenerator {
         movePos = pawn.getPosition().add(pawn.isWhite() ? up : down).add(right);
         if (Board.isPositionValid(movePos)) {
             if ((other = Board.getPieceAt(movePos)) != null) {
-                if (other.getColor() != pawn.getColor()) {
+                if (other.getColor() != pawn.getColor() || force) {
                     moves.add(new Move(movePos, other, Move::take));
                 }
             }
@@ -57,7 +61,7 @@ public class MoveGenerator {
         return moves;
     }
 
-    public static ArrayList<Move> generateRookMoves(Piece rook) {
+    public static ArrayList<Move> generateRookMoves(Piece rook, boolean force) {
         ArrayList<Move> moves = new ArrayList<>(1);
         Piece other;
         Vector2 movePos = rook.getPosition();
@@ -70,7 +74,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != rook.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -85,7 +91,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != rook.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -100,7 +108,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != rook.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -115,7 +125,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != rook.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -123,13 +135,13 @@ public class MoveGenerator {
         return moves;
     }
 
-    public static ArrayList<Move> generateKnightMoves(Piece knight) {
+    public static ArrayList<Move> generateKnightMoves(Piece knight, boolean force) {
         ArrayList<Move> moves = new ArrayList<>(1);
         Piece other;
         Vector2 movePos = knight.getPosition().add(up).add(up).add(left);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -137,7 +149,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(up).add(left).add(left);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -145,7 +157,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(up).add(up).add(right);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -153,7 +165,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(up).add(right).add(right);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -161,7 +173,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(down).add(down).add(left);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -169,7 +181,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(down).add(left).add(left);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -177,7 +189,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(down).add(down).add(right);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -185,7 +197,7 @@ public class MoveGenerator {
         movePos = knight.getPosition().add(down).add(right).add(right);
         if (Board.isPositionValid(movePos)) {
             other = Board.getPieceAt(movePos);
-            if (other == null)
+            if (other == null || force)
                 moves.add(new Move(movePos));
             else if (other.getColor() != knight.getColor())
                 moves.add(new Move(movePos, other, Move::take));
@@ -193,7 +205,7 @@ public class MoveGenerator {
         return moves;
     }
 
-    public static ArrayList<Move> generateBishopMoves(Piece bishop) {
+    public static ArrayList<Move> generateBishopMoves(Piece bishop, boolean force) {
         ArrayList<Move> moves = new ArrayList<>(1);
         Piece other;
         Vector2 movePos = bishop.getPosition();
@@ -206,7 +218,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != bishop.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -221,7 +235,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != bishop.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -236,7 +252,9 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != bishop.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
@@ -251,19 +269,20 @@ public class MoveGenerator {
                     moves.add(new Move(movePos));
                 else if (other.getColor() != bishop.getColor()) {
                     moves.add(new Move(movePos, other, Move::take));
-                    break;
+                    if (!force || other.getType() != Type.KING) {
+                        break;
+                    }
                 } else
                     break;
             }
         }
-
         return moves;
     }
 
-    public static ArrayList<Move> generateQueenMoves(Piece queen) {
+    public static ArrayList<Move> generateQueenMoves(Piece queen, boolean force) {
         ArrayList<Move> moves = new ArrayList<>();
-        moves.addAll(generateRookMoves(queen));
-        moves.addAll(generateBishopMoves(queen));
+        moves.addAll(generateRookMoves(queen,force));
+        moves.addAll(generateBishopMoves(queen, force));
         return moves;
     }
 
@@ -361,27 +380,53 @@ public class MoveGenerator {
      * @return an ArrayList of culled moves
      */
     private static ArrayList<Move> cullMoves(ArrayList<Move> moves, Piece piece) {
-        ArrayList<Move> result = new ArrayList<>();
-        if (piece.getType() != Type.KING) {
-            System.out.println("Culling moves for " + piece.getType());
-            if (Board.isWhiteChecked() && piece.isWhite()) {
-                System.out.println("Remove all none King saving moves");
-                // TODO Remove any move that doesn't uncheck the king
-                for (Move move : moves) {
-                    if (move.getPosition().compareTo(Board.getBlackAttacker().getPosition()) == 0)
-                        result.add(move);
-                }
-            } else if (Board.isBlackChecked() && !piece.isWhite()) {
-                // TODO Remove any move that doesn't uncheck the king
-                for (Move move : moves) {
-                    if (move.getPosition().compareTo(Board.getWhiteAttacker().getPosition()) == 0)
-                        result.add(move);
+        ArrayList<Move> removeList = new ArrayList<>();
+        if (Board.isWhiteChecked() && piece.isWhite() && piece.getType() != Type.KING) {
+            Move toAttacker = new Move(Board.getBlackAttacker().getPosition());
+            for (Move move : moves)
+                if (!move.equals(toAttacker))
+                    removeList.add(move);
+        } else if (Board.isBlackChecked() && !piece.isWhite() && piece.getType() != Type.KING) {
+            Move toAttacker = new Move(Board.getWhiteAttacker().getPosition());
+            for (Move move : moves) {
+                if (!move.equals(toAttacker))
+                    removeList.add(move);
+            }
+        } else if (piece.isWhite() && piece.getType() == Type.KING) {
+            ArrayList<Move> postMoveMoves = new ArrayList<>();
+            for (Piece black : Board.blacks) {
+                postMoveMoves.addAll(generateMoves(black, true));
+            }
+            for (Move postMoveMove : postMoveMoves) {
+                if (moves.contains(postMoveMove) && !removeList.contains(postMoveMove)) {
+                    removeList.add(postMoveMove);
                 }
             }
-        } else {
-
+            for (Move move : moves) {
+                for (Piece black : Board.blacks) {
+                    if (generateMoves(black, true).contains(move) && !removeList.contains(move))
+                        removeList.add(move);
+                }
+            }
+        } else if (!piece.isWhite() && piece.getType() == Type.KING) {
+            ArrayList<Move> postMoveMoves = new ArrayList<>();
+            for (Piece white : Board.whites) {
+                postMoveMoves.addAll(generateMoves(white, true));
+            }
+            for (Move postMoveMove : postMoveMoves) {
+                if (moves.contains(postMoveMove) && !removeList.contains(postMoveMove)) {
+                    removeList.add(postMoveMove);
+                }
+            }
+            for (Move move : moves) {
+                for (Piece black : Board.blacks) {
+                    if (generateMoves(black, true).contains(move) && !removeList.contains(move))
+                        removeList.add(move);
+                }
+            }
         }
-        moves.removeAll(result);
+        if (!removeList.isEmpty())
+            moves.removeAll(removeList);
         return moves;
     }
 }
