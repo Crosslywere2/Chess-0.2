@@ -383,14 +383,27 @@ public class MoveGenerator {
         ArrayList<Move> removeList = new ArrayList<>();
         if (Board.isWhiteChecked() && piece.isWhite() && piece.getType() != Type.KING) {
             Move toAttacker = new Move(Board.getBlackAttacker().getPosition());
-            for (Move move : moves)
+            for (Move move : moves) {
                 if (!move.equals(toAttacker))
                     removeList.add(move);
+            }
+            ArrayList<Move> attackerMoves = generateMoves(Board.getBlackAttacker());
+            for (Move attackerMove : attackerMoves) {
+                if (moves.contains(attackerMove)) {
+                    removeList.remove(attackerMove);
+                }
+            }
         } else if (Board.isBlackChecked() && !piece.isWhite() && piece.getType() != Type.KING) {
             Move toAttacker = new Move(Board.getWhiteAttacker().getPosition());
             for (Move move : moves) {
                 if (!move.equals(toAttacker))
                     removeList.add(move);
+            }
+            ArrayList<Move> attackerMoves = generateMoves(Board.getWhiteAttacker());
+            for (Move attackerMove : attackerMoves) {
+                if (moves.contains(attackerMove)) {
+                    removeList.remove(attackerMove);
+                }
             }
         } else if (piece.isWhite() && piece.getType() == Type.KING) {
             ArrayList<Move> postMoveMoves = new ArrayList<>();
