@@ -36,7 +36,7 @@ public class MoveGenerator {
             if (Board.getPieceAt(movePos) == null && !force) {
                 moves.add(new Move(movePos));
                 movePos = movePos.add(pawn.isWhite() ? up : down);
-                if (!pawn.isMoved() && Board.getPieceAt(movePos) == null) {
+                if (!pawn.isMoved() && Board.getPieceAt(movePos) == null && !force) {
                     moves.add(new Move(movePos));
                 }
             }
